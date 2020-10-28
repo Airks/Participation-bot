@@ -114,6 +114,11 @@ client.login(config.BOT_TOKEN);
 async function leaderBoard(msg){
     /* Fetch and sort all the scores from the database */
     var leaderBoard = await Users.findAll({attributes: ['name', 'score']});
+    if (leaderBoard.length == 0) {
+        msg.reply("There is nothing to show yet.");
+        return;
+    }
+
     leaderBoard.sort((a, b) => {
         return b.get('score') - a.get('score');
     });
@@ -176,7 +181,7 @@ async function showScore(args, msg){
             if (currentUser === null){
                 msg.reply(username + " doesn't have a score yet.");
             } else {
-                msg.reply(`${username}'s score is ${await currentUser.score}`);
+                msg.reply(`${username}'s score is ${currentUser.get('score')}`);
             }
         });
 
@@ -185,7 +190,7 @@ async function showScore(args, msg){
         if (currentUser === null){
             msg.reply("You don't have a score yet, start talking!");
         } else {
-            msg.reply(`Your score is ${await currentUser.score}`);
+            msg.reply(`Your score is ${currentUser.get('score')}`);
         }
     }
 }
