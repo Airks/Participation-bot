@@ -9,9 +9,7 @@
   "author": "Raahs",
   "license": "ISC",
   "dependencies": {
-    "@keyv/sqlite": "^2.0.2",
     "discord.js": "^12.4.1",
-    "keyv": "^4.0.3",
     "sequelize": "^6.3.5",
     "sql": "^0.78.0",
     "sqlite": "^4.0.15",
