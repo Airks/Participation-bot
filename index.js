@@ -27,10 +27,11 @@ const Users = sequelize.define('users', {
 
 client.once('ready', () => {
     Users.sync();
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`${dateOfPreviousMsg.toLocaleTimeString('fr-FR')} Logged in as ${client.user.tag}`);
 })
 
 var lastUserID = "";
+var dateOfPreviousMsg = new Date();
 const prefix = "$";
 
 client.on('message', async msg => {
@@ -62,7 +63,6 @@ client.on('message', async msg => {
                         if (username.includes('@')){
                             const regex = /[<>@!]/gi;
                             id = username.replace(regex, '');
-                            dbg(username);
                             var currentUser = await Users.findOne({where: {id: id}});
 
                         } else {
@@ -97,8 +97,9 @@ client.on('message', async msg => {
     }
 
 
-    if (msg.author.id != lastUserID){
+    if (msg.author.id != lastUserID || elapsedTimeInHours(msg.createdAt, dateOfPreviousMsg) >= 1) {
         lastUserID = msg.author.id;
+        dateOfPreviousMsg = msg.createdAt;
 
         // Look for the user in the DB
         try {
@@ -107,7 +108,7 @@ client.on('message', async msg => {
                 defaults: {name: msg.author.username}
             });
             var currentScore = user.get('score') + 1;
-            console.log(`${user.get('name')} has a score of ${user.get('score')}`);
+            console.log(`${user.get('name')} has a score of ${currentScore}`);
         } catch (e) {
             console.log("Creation failed.");
             console.log(e.name + " " + e.message);
@@ -129,6 +130,15 @@ client.on('message', async msg => {
 
 client.login(config.BOT_TOKEN);
 
+function elapsedTimeInHours(current, ancient){
+    var time = new Date(current.getTime() - ancient.getTime());
+    time /= 1000; // time in seconds
+    time = Math.floor(time / 60); // time in minutes
+    time = Math.floor(time / 60); // time in hours
+    dbg(time);
+    if (time >= 1) console.log("Adding a new score: more than one hour has passed since last message.");
+    return time;
+}
 function dbg(msg){
     console.log(msg);
 }
