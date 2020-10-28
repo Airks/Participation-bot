@@ -54,42 +54,15 @@ client.on('message', async msg => {
                 break;
 
             case "score":
-                if (args.length > 1){
-                    args.forEach(async (username) => {
+                showScore(args, msg);
+                break;
 
-                        if (username == args[0]) return; // Ignore the actual command
-
-                        // Test for the username written as is or with @
-                        if (username.includes('@')){
-                            const regex = /[<>@!]/gi;
-                            id = username.replace(regex, '');
-                            var currentUser = await Users.findOne({where: {id: id}});
-
-                        } else {
-
-                            var currentUser = await Users.findOne({where: {name: username}});
-                        }
-
-                        if (currentUser === null){
-                            msg.reply(username + " doesn't have a score yet.");
-                        } else {
-                            msg.reply(`${username}'s score is ${await currentUser.score}`);
-                        }
-                    });
-
-                } else {
-                    var currentUser = await Users.findOne({where: {id: msg.author.id}});
-                    if (currentUser === null){
-                        msg.reply("You don't have a score yet, start talking!");
-                    } else {
-                        msg.reply(`Your score is ${await currentUser.score}`);
-                    }
-                }
-
-            break;
+            case "update":
+                updateUsername(msg);
+                break;
 
             default:
-            msg.reply(`Unknown command: ${msg.content.slice(1)}`);
+                msg.reply(`Unknown command: ${msg.content.slice(1)}`);
         }
         // Auto delete commands to keep the chat clean
         msg.delete().catch(console.error);
@@ -117,11 +90,11 @@ client.on('message', async msg => {
         try {
             const affectedRows = await Users.update({ score: currentScore},
             { where: { id: lastUserID } });
-            if (affectedRows.length = 0) {
+            if (affectedRows.length == 0) {
                 console.log("Something went wrong.");
             }
         }catch (e){
-            console.log("Update failed.");
+            console.log("Update score failed.");
             console.log(e.name + " " + e.message);
         }
         return;
@@ -130,12 +103,73 @@ client.on('message', async msg => {
 
 client.login(config.BOT_TOKEN);
 
+async function updateUsername(msg){
+    var log = ""
+    try {
+        const user = await Users.findOne({where: {id: msg.author.id }})
+        if (user == null) {
+            msg.reply("User not found. Try again after writing some messages.");
+        } else {
+            log = "User " + user.get('name');
+        }
+    } catch (e){
+        console.log("Connection to DB failed");
+        console.log(e.name + " " + e.message);
+    }
+    try {
+        const success = await Users.update({ name: msg.author.username},
+            { where: { id: msg.author.id } });
+        if (success.length == 0) {
+            console.log("updateUsername: User not found");
+        } else {
+            log += " updated to " + msg.author.username;
+            console.log(log);
+        }
+    } catch (e){
+        console.log("Update username failed");
+        console.log(e.name + " " + e.message);
+    }
+}
+
+async function showScore(args, msg){
+    if (args.length > 1){
+        args.forEach(async (username) => {
+
+            if (username == args[0]) return; // Ignore the actual command
+
+            // Test for the username written as is or with @
+            if (username.includes('@')){
+                const regex = /[<>@!]/gi;
+                id = username.replace(regex, '');
+                var currentUser = await Users.findOne({where: {id: id}});
+
+            } else {
+
+                var currentUser = await Users.findOne({where: {name: username}});
+            }
+
+            if (currentUser === null){
+                msg.reply(username + " doesn't have a score yet.");
+            } else {
+                msg.reply(`${username}'s score is ${await currentUser.score}`);
+            }
+        });
+
+    } else {
+        var currentUser = await Users.findOne({where: {id: msg.author.id}});
+        if (currentUser === null){
+            msg.reply("You don't have a score yet, start talking!");
+        } else {
+            msg.reply(`Your score is ${await currentUser.score}`);
+        }
+    }
+}
+
 function elapsedTimeInHours(current, ancient){
     var time = new Date(current.getTime() - ancient.getTime());
     time /= 1000; // time in seconds
     time = Math.floor(time / 60); // time in minutes
     time = Math.floor(time / 60); // time in hours
-    dbg(time);
     if (time >= 1) console.log("Adding a new score: more than one hour has passed since last message.");
     return time;
 }
