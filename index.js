@@ -61,15 +61,22 @@ client.on('message', async msg => {
                 updateUsername(msg);
                 break;
 
+            case "leader":
+                leaderBoard(msg);
+                break;
+
             default:
                 msg.reply(`Unknown command: ${msg.content.slice(1)}`);
         }
         // Auto delete commands to keep the chat clean
-        msg.delete().catch(console.error);
+        msg.delete()
+        /* I have NO IDEA WHY if I delete the comment below, any command sent by the host won't be deleted */
+            // .then(msg => console.log("The command has been deleted."))
+            .catch(console.error);
         return;
     }
 
-
+    /* The score is incremented whenever the user talks after another user, or after 1 hour */
     if (msg.author.id != lastUserID || elapsedTimeInHours(msg.createdAt, dateOfPreviousMsg) >= 1) {
         lastUserID = msg.author.id;
         dateOfPreviousMsg = msg.createdAt;
@@ -88,9 +95,10 @@ client.on('message', async msg => {
         }
 
         try {
-            const affectedRows = await Users.update({ score: currentScore},
+            // success is the number of affected rows, it should be 1
+            const success = await Users.update({ score: currentScore},
             { where: { id: lastUserID } });
-            if (affectedRows.length == 0) {
+            if (success.length == 0) {
                 console.log("Something went wrong.");
             }
         }catch (e){
@@ -102,6 +110,23 @@ client.on('message', async msg => {
 });
 
 client.login(config.BOT_TOKEN);
+
+async function leaderBoard(msg){
+    /* Fetch and sort all the scores from the database */
+    var leaderBoard = await Users.findAll({attributes: ['name', 'score']});
+    leaderBoard.sort((a, b) => {
+        return b.get('score') - a.get('score');
+    });
+
+    /* Make the message easily readable */
+    var message = "```"
+    leaderBoard.forEach((user) => {
+        const name = user.get('name');
+        const score = user.get('score');
+        message += name + " has ".padStart(30 - name.length) + score + "points.\n"
+    });
+    msg.channel.send(message + "```");
+}
 
 async function updateUsername(msg){
     var log = ""
@@ -170,7 +195,7 @@ function elapsedTimeInHours(current, ancient){
     time /= 1000; // time in seconds
     time = Math.floor(time / 60); // time in minutes
     time = Math.floor(time / 60); // time in hours
-    if (time >= 1) console.log("Adding a new score: more than one hour has passed since last message.");
+    if (time >= 1) console.log("Score incremented: more than one hour has passed since last message.");
     return time;
 }
 function dbg(msg){
