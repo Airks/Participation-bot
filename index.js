@@ -46,10 +46,6 @@ client.on('message', async msg => {
         const command = args[0].slice(1);
 
         switch (command){
-            case "ping":
-                const timeTaken = Date.now() - msg.createdTimestamp;
-                msg.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
-            break;
 
             // For debug purposes only, no cheating
             case "dbg":
