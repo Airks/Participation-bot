@@ -65,6 +65,14 @@ client.on('message', async msg => {
                 leaderBoard(msg);
                 break;
 
+            case "hella":
+                msg.reply("Hell yeah!");
+                break;
+
+            case "podium":
+                podium(msg);
+                break;
+                
             default:
                 msg.reply(`Unknown command: ${msg.content.slice(1)}`);
         }
@@ -88,7 +96,11 @@ client.on('message', async msg => {
                 defaults: {name: msg.author.username}
             });
             var currentScore = user.get('score') + 1;
-            console.log(`${user.get('name')} has a score of ${currentScore}`);
+        //Congrats for reaching 1000!
+        if (currentScore == 1000){
+            msg.channel.send("Congratulations " + msg.author.username + " for reaching 1000!");
+        }
+        console.log(`${user.get('name')} has a score of ${currentScore}`);
         } catch (e) {
             console.log("Creation failed.");
             console.log(e.name + " " + e.message);
@@ -111,6 +123,31 @@ client.on('message', async msg => {
 
 client.login(config.BOT_TOKEN);
 
+async function podium(msg){
+    /* Fetch and sort all the scores from the database */
+    var podium = await Users.findAll({attributes: ['name', 'score']});
+    if (podium.length == 0) {
+        msg.reply("There is nothing to show yet.");
+        return;
+    }
+
+    podium.sort((a, b) => {
+        return b.get('score') - a.get('score');
+    });
+
+    // Only get the 3 winning users
+    podium = podium.slice(0, 2);
+
+    /* Make the message easily readable */
+    var message = "```"
+    podium.forEach((user) => {
+        const name = user.get('name');
+        const score = user.get('score');
+        message += name + " has ".padStart(30 - name.length) + score + " points.\n"
+    });
+    msg.channel.send(message + "```");
+}
+
 async function leaderBoard(msg){
     /* Fetch and sort all the scores from the database */
     var leaderBoard = await Users.findAll({attributes: ['name', 'score']});
@@ -128,7 +165,7 @@ async function leaderBoard(msg){
     leaderBoard.forEach((user) => {
         const name = user.get('name');
         const score = user.get('score');
-        message += name + " has ".padStart(30 - name.length) + score + "points.\n"
+        message += name + " has ".padStart(30 - name.length) + score + " points.\n"
     });
     msg.channel.send(message + "```");
 }
