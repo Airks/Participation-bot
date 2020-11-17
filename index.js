@@ -136,7 +136,7 @@ async function podium(msg){
     });
 
     // Only get the 3 winning users
-    podium = podium.slice(0, 2);
+    podium = podium.slice(0, 3);
 
     /* Make the message easily readable */
     var message = "```"
