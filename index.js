@@ -72,7 +72,7 @@ client.on('message', async msg => {
             case "podium":
                 podium(msg);
                 break;
-                
+
             default:
                 msg.reply(`Unknown command: ${msg.content.slice(1)}`);
         }
@@ -184,7 +184,7 @@ async function updateUsername(msg){
         console.log(e.name + " " + e.message);
     }
     try {
-        const success = await Users.update({ name: msg.author.username},
+        const success = await Users.update({ name: msg.member.nickname},
             { where: { id: msg.author.id } });
         if (success.length == 0) {
             console.log("updateUsername: User not found");
