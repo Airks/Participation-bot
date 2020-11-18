@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Sequelize = require('sequelize');
 const config = require("./config.json");
 const deleteTimeout = 10000;
+const emoji = '🤖' // This is used to prevent bot's messages from being deleted
 
 const client = new Discord.Client();
 const sequelize = new Sequelize('database', 'user', 'password', {
@@ -40,8 +41,8 @@ var dateOfPreviousMsg = new Date();
 const prefix = "$";
 
 client.on('message', async msg => {
-    // Auto delete the bot messages so the chat won't be full of trash
-    if (msg.author.bot){
+    // Auto delete the bot messages so the chat won't be full of trash, unless the emoji is present at the beginning
+    if (msg.author.bot && msg.content[0] != emoji){
         msg.delete({timeout: deleteTimeout});
         return;
     };
@@ -62,9 +63,10 @@ client.on('message', async msg => {
                 showScore(args, msg);
                 break;
 
-            case "update":
-                updateUsername(msg);
-                break;
+            // This shouldn't be needed anymore
+            // case "update":
+            //     updateUsername(msg);
+            //     break;
 
             case "leader":
                 leaderBoard(msg);
@@ -116,19 +118,19 @@ client.on('message', async msg => {
                     msg.channel.send("Welcome to the game " + nick + "!");
                     break;
                 case 69:
-                    msg.channel.send("69 " + nick + ", nice.");
+                    msg.channel.send(emoji + " 69 " + nick + ", nice.");
                     break;
                 case 420:
-                    msg.channel.send(nick + " 420? Smoke weed every day.");
+                    msg.channel.send(emoji + " " + nick + " 420? Smoke weed every day.");
                     break;
                 case 666:
-                    msg.channel.send("Careful " + nick + ", 666 attracts the devil.");
+                    msg.channel.send(emoji + " Careful " + nick + ", 666 attracts the devil.");
                     break;
                 case 1000:
-                    msg.channel.send("Congratulations " + nick + " for reaching 1000!");
+                    msg.channel.send(emoji + " Congratulations " + nick + " for reaching 1000!");
                     break;
                 case 2000:
-                    msg.channel.send("Wow " + nick + " you're on fire! 2000 points!");
+                    msg.channel.send(emoji + " Wow " + nick + " you're on fire! 2000 points!");
                     break;
                 default:
                     // Do nothing
