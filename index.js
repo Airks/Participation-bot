@@ -18,7 +18,11 @@ const Users = sequelize.define('users', {
         primaryKey: true
     },
     name: Sequelize.STRING,
-    nick: Sequelize.STRING,
+    nick: {
+        type: Sequelize.STRING,
+        defaultValue: "(user)",
+        allowNull: false
+    },
     score: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
@@ -90,6 +94,7 @@ client.on('message', async msg => {
         lastUserID = msg.author.id;
         dateOfPreviousMsg = msg.createdAt;
 
+
         // Look for the user in the DB
         try {
             const [user, created] = await Users.findOrCreate({
@@ -98,7 +103,12 @@ client.on('message', async msg => {
                            nick: msg.member.nickname}
             });
             var currentScore = user.get('score') + 1;
-            var nick = msg.member.nickname;
+
+            var nick = msg.member.nickname
+            if (nick == "" || nick == null){
+                nick = msg.author.username
+            }
+
 
             // Interesting messages...
             switch (currentScore){
@@ -190,7 +200,7 @@ async function leaderBoard(msg){
     leaderBoard.forEach((user) => {
         const nick = user.get('nick');
         const score = user.get('score');
-        message += nick + " has ".padStart(30 - nick.length) + score + " points.\n"
+        message += nick + " has ".padStart(20 - nick.length) + score + " points.\n"
     });
     msg.channel.send(message + "```");
 }
