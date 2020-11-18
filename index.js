@@ -96,7 +96,31 @@ client.on('message', async msg => {
                 defaults: {name: msg.author.username}
             });
             var currentScore = user.get('score') + 1;
-        //Congrats for reaching 1000!
+        // Interesting messages...
+        switch (currentScore){
+            case 1:
+                msg.channel.send("Welcome to the game " + msg.author.username + "!");
+                break;
+            case 69:
+                msg.channel.send("69 " + msg.author.username + ", nice.");
+                break;
+            case 420:
+                msg.channel.send(msg.author.username + " 420? Smoke weed every day.");
+                break;
+            case 666:
+                msg.channel.send("Careful " + msg.author.username + " 666 attracts the devil.");
+                break;
+            case 1000:
+                msg.channel.send("Congratulations " + msg.author.username + " for reaching 1000!");
+                break;
+            case 2000:
+                msg.channel.send("Wow " + msg.author.username + " you're on fire! 2000 points!");
+                break;
+            default:
+                // Do nothing
+                break;    
+        }
+
         if (currentScore == 1000){
             msg.channel.send("Congratulations " + msg.author.username + " for reaching 1000!");
         }
