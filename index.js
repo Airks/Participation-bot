@@ -18,6 +18,7 @@ const Users = sequelize.define('users', {
         primaryKey: true
     },
     name: Sequelize.STRING,
+    nick: Sequelize.STRING,
     score: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
@@ -93,38 +94,38 @@ client.on('message', async msg => {
         try {
             const [user, created] = await Users.findOrCreate({
                 where: {id: lastUserID},
-                defaults: {name: msg.author.username}
+                defaults: {name: msg.author.username,
+                           nick: msg.member.nickname}
             });
             var currentScore = user.get('score') + 1;
-        // Interesting messages...
-        switch (currentScore){
-            case 1:
-                msg.channel.send("Welcome to the game " + msg.author.username + "!");
-                break;
-            case 69:
-                msg.channel.send("69 " + msg.author.username + ", nice.");
-                break;
-            case 420:
-                msg.channel.send(msg.author.username + " 420? Smoke weed every day.");
-                break;
-            case 666:
-                msg.channel.send("Careful " + msg.author.username + " 666 attracts the devil.");
-                break;
-            case 1000:
-                msg.channel.send("Congratulations " + msg.author.username + " for reaching 1000!");
-                break;
-            case 2000:
-                msg.channel.send("Wow " + msg.author.username + " you're on fire! 2000 points!");
-                break;
-            default:
-                // Do nothing
-                break;    
-        }
+            var nick = msg.member.nickname;
 
-        if (currentScore == 1000){
-            msg.channel.send("Congratulations " + msg.author.username + " for reaching 1000!");
-        }
-        console.log(`${user.get('name')} has a score of ${currentScore}`);
+            // Interesting messages...
+            switch (currentScore){
+                case 1:
+                    msg.channel.send("Welcome to the game " + nick + "!");
+                    break;
+                case 69:
+                    msg.channel.send("69 " + nick + ", nice.");
+                    break;
+                case 420:
+                    msg.channel.send(nick + " 420? Smoke weed every day.");
+                    break;
+                case 666:
+                    msg.channel.send("Careful " + nick + ", 666 attracts the devil.");
+                    break;
+                case 1000:
+                    msg.channel.send("Congratulations " + nick + " for reaching 1000!");
+                    break;
+                case 2000:
+                    msg.channel.send("Wow " + nick + " you're on fire! 2000 points!");
+                    break;
+                default:
+                    // Do nothing
+                    break;
+            }
+
+        console.log(`${user.get('nick')} has a score of ${currentScore}`);
         } catch (e) {
             console.log("Creation failed.");
             console.log(e.name + " " + e.message);
@@ -132,7 +133,7 @@ client.on('message', async msg => {
 
         try {
             // success is the number of affected rows, it should be 1
-            const success = await Users.update({ score: currentScore},
+            const success = await Users.update({ score: currentScore, nick: nick},
             { where: { id: lastUserID } });
             if (success.length == 0) {
                 console.log("Something went wrong.");
@@ -149,7 +150,7 @@ client.login(config.BOT_TOKEN);
 
 async function podium(msg){
     /* Fetch and sort all the scores from the database */
-    var podium = await Users.findAll({attributes: ['name', 'score']});
+    var podium = await Users.findAll({attributes: ['nick', 'score']});
     if (podium.length == 0) {
         msg.reply("There is nothing to show yet.");
         return;
@@ -165,16 +166,16 @@ async function podium(msg){
     /* Make the message easily readable */
     var message = "```"
     podium.forEach((user) => {
-        const name = user.get('name');
+        const nick = user.get('nick');
         const score = user.get('score');
-        message += name + " has ".padStart(30 - name.length) + score + " points.\n"
+        message += nick + " has ".padStart(30 - nick.length) + score + " points.\n"
     });
     msg.channel.send(message + "```");
 }
 
 async function leaderBoard(msg){
     /* Fetch and sort all the scores from the database */
-    var leaderBoard = await Users.findAll({attributes: ['name', 'score']});
+    var leaderBoard = await Users.findAll({attributes: ['nick', 'score']});
     if (leaderBoard.length == 0) {
         msg.reply("There is nothing to show yet.");
         return;
@@ -187,9 +188,9 @@ async function leaderBoard(msg){
     /* Make the message easily readable */
     var message = "```"
     leaderBoard.forEach((user) => {
-        const name = user.get('name');
+        const nick = user.get('nick');
         const score = user.get('score');
-        message += name + " has ".padStart(30 - name.length) + score + " points.\n"
+        message += nick + " has ".padStart(30 - nick.length) + score + " points.\n"
     });
     msg.channel.send(message + "```");
 }
@@ -201,19 +202,19 @@ async function updateUsername(msg){
         if (user == null) {
             msg.reply("User not found. Try again after writing some messages.");
         } else {
-            log = "User " + user.get('name');
+            log = "User " + user.get('nick');
         }
     } catch (e){
         console.log("Connection to DB failed");
         console.log(e.name + " " + e.message);
     }
     try {
-        const success = await Users.update({ name: msg.member.nickname},
+        const success = await Users.update({ nick: msg.member.nickname},
             { where: { id: msg.author.id } });
         if (success.length == 0) {
             console.log("updateUsername: User not found");
         } else {
-            log += " updated to " + msg.author.username;
+            log += " updated to " + msg.member.nickname;
             console.log(log);
         }
     } catch (e){
