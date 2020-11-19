@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Sequelize = require('sequelize');
 const config = require("./config.json");
-const deleteTimeout = 10000;
+var   deleteTimeout = 10000;
 const emoji = '🤖' // This is used to prevent bot's messages from being deleted
 
 const client = new Discord.Client();
@@ -51,6 +51,7 @@ client.on('message', async msg => {
     if (msg.content.startsWith(prefix)){
         const args = msg.content.split(' ');
         const command = args[0].slice(1);
+        deleteTimeout = 10000;
 
         switch (command){
 
@@ -70,6 +71,7 @@ client.on('message', async msg => {
 
             case "leader":
                 leaderBoard(msg);
+                deleteTimeout = 20000;
                 break;
 
             case "hella":
