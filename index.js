@@ -42,7 +42,7 @@ const prefix = "$";
 
 client.on('message', async msg => {
     // Auto delete the bot messages so the chat won't be full of trash, unless the emoji is present at the beginning
-    if (msg.author.bot && msg.content[0] != emoji){
+    if (msg.author.bot && !msg.content.startsWith(emoji)){
         msg.delete({timeout: deleteTimeout});
         return;
     };
