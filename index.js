@@ -237,25 +237,25 @@ async function updateUsername(msg){
 
 async function showScore(args, msg){
     if (args.length > 1){
-        args.forEach(async (username) => {
+        args.forEach(async (nick) => {
 
-            if (username == args[0]) return; // Ignore the actual command
+            if (nick == args[0]) return; // Ignore the actual command
 
-            // Test for the username written as is or with @
-            if (username.includes('@')){
+            // Test for the nick written as is or with @
+            if (nick.includes('@')){
                 const regex = /[<>@!]/gi;
-                id = username.replace(regex, '');
+                id = nick.replace(regex, '');
                 var currentUser = await Users.findOne({where: {id: id}});
 
             } else {
 
-                var currentUser = await Users.findOne({where: {name: username}});
+                var currentUser = await Users.findOne({where: {nick: nick}});
             }
 
             if (currentUser === null){
-                msg.reply(username + " doesn't have a score yet.");
+                msg.reply(nick + " doesn't have a score yet.");
             } else {
-                msg.reply(`${username}'s score is ${currentUser.get('score')}`);
+                msg.reply(`${nick}'s score is ${currentUser.get('score')}`);
             }
         });
 
